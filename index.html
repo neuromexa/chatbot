@@ -1580,11 +1580,29 @@
                 
                 const data = await response.json();
                 
+                // ✅ DEBUG: N8n'den gelen yanıtı konsola yazdır
+                console.log('N8N Response:', data);
+                console.log('Response keys:', Object.keys(data));
+                
                 // Hide typing indicator
                 hideTyping();
                 
+                // ✅ N8n'den gelen yanıtı al (öncelik sırası: output -> response -> message -> diğerleri)
+                let botResponse = data.output || 
+                                 data.response || 
+                                 data.message || 
+                                 data.text || 
+                                 data.reply || 
+                                 data.answer ||
+                                 (data.data && data.data.output) ||
+                                 (data.data && data.data.response) ||
+                                 (data.data && data.data.message) ||
+                                 'Yanıt alınamadı.';
+                
+                console.log('Bot Response:', botResponse);
+                
                 // Add bot response
-                addMessage('bot', data.response || data.message || 'Yanıt alınamadı.');
+                addMessage('bot', botResponse);
                 
                 // Play sound and show notification if window is not open
                 if (!isOpen) {
