@@ -1065,18 +1065,7 @@
 
             <!-- Quick Replies -->
             <div class="quick-replies" id="quickReplies">
-                <button class="quick-reply" onclick="sendQuickReply('Ürünler hakkında bilgi')">
-                    📦 Ürünler
-                </button>
-                <button class="quick-reply" onclick="sendQuickReply('Fiyat listesi')">
-                    💰 Fiyatlar
-                </button>
-                <button class="quick-reply" onclick="sendQuickReply('Teknik destek')">
-                    🔧 Destek
-                </button>
-                <button class="quick-reply" onclick="sendQuickReply('İletişim')">
-                    📞 İletişim
-                </button>
+                <!-- Quick replies will be generated dynamically by JavaScript -->
             </div>
 
             <!-- Chat Input -->
@@ -1183,9 +1172,30 @@
                 welcomeTitle: 'Hoş Geldiniz!',
                 welcomeText: 'Size nasıl yardımcı olabilirim?',
                 placeholder: 'Mesajınızı yazın...',
-                bayiLogin: 'Bayi Girişi',
                 tooltip: '👋 Merhaba! Size nasıl yardımcı olabilirim?',
-                quickReplies: ['📦 Ürünler', '💰 Fiyatlar', '🔧 Destek', '📞 İletişim']
+                bayiLoginBtn: 'Bayi Giriş',
+                bayiLoginTitle: '🔐 Bayi Girişi',
+                bayiLoginSubtitle: 'Özel içeriklere erişmek için giriş yapın',
+                emailLabel: 'E-posta Adresi',
+                emailPlaceholder: 'ornek@sirket.com',
+                passwordLabel: 'Şifre',
+                passwordPlaceholder: '••••••••',
+                cancelBtn: 'İptal',
+                loginBtn: 'Giriş Yap',
+                logoutTitle: '👋 Çıkış Yap',
+                logoutMessage: 'hesabından çıkmak istediğinize emin misiniz?',
+                logoutBtn: 'Çıkış Yap',
+                logoutSuccess: 'Başarıyla çıkış yaptınız. Tekrar görüşmek üzere! 👋',
+                welcomeMessage: 'bayimiz! Size nasıl yardımcı olabilirim?',
+                errorFillFields: 'Lütfen tüm alanları doldurun',
+                errorWrongCredentials: 'E-posta veya şifre hatalı!',
+                errorLoginFailed: 'Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.',
+                quickReplies: [
+                    { icon: '📦', text: 'Ürünler', query: 'Ürünler hakkında bilgi' },
+                    { icon: '💰', text: 'Fiyatlar', query: 'Fiyat listesi' },
+                    { icon: '🔧', text: 'Destek', query: 'Teknik destek' },
+                    { icon: '📞', text: 'İletişim', query: 'İletişim' }
+                ]
             },
             en: {
                 botName: 'AI Assistant',
@@ -1193,9 +1203,30 @@
                 welcomeTitle: 'Welcome!',
                 welcomeText: 'How can I help you today?',
                 placeholder: 'Type your message...',
-                bayiLogin: 'Dealer Login',
                 tooltip: '👋 Hello! How can I help you?',
-                quickReplies: ['📦 Products', '💰 Prices', '🔧 Support', '📞 Contact']
+                bayiLoginBtn: 'Dealer Login',
+                bayiLoginTitle: '🔐 Dealer Login',
+                bayiLoginSubtitle: 'Login to access exclusive content',
+                emailLabel: 'Email Address',
+                emailPlaceholder: 'example@company.com',
+                passwordLabel: 'Password',
+                passwordPlaceholder: '••••••••',
+                cancelBtn: 'Cancel',
+                loginBtn: 'Login',
+                logoutTitle: '👋 Logout',
+                logoutMessage: 'Are you sure you want to logout?',
+                logoutBtn: 'Logout',
+                logoutSuccess: 'Successfully logged out. See you again! 👋',
+                welcomeMessage: ' dealer! How can I help you?',
+                errorFillFields: 'Please fill in all fields',
+                errorWrongCredentials: 'Incorrect email or password!',
+                errorLoginFailed: 'An error occurred during login. Please try again.',
+                quickReplies: [
+                    { icon: '📦', text: 'Products', query: 'Product information' },
+                    { icon: '💰', text: 'Prices', query: 'Price list' },
+                    { icon: '🔧', text: 'Support', query: 'Technical support' },
+                    { icon: '📞', text: 'Contact', query: 'Contact us' }
+                ]
             },
             de: {
                 botName: 'KI-Assistent',
@@ -1203,9 +1234,30 @@
                 welcomeTitle: 'Willkommen!',
                 welcomeText: 'Wie kann ich Ihnen helfen?',
                 placeholder: 'Nachricht eingeben...',
-                bayiLogin: 'Händler-Login',
                 tooltip: '👋 Hallo! Wie kann ich helfen?',
-                quickReplies: ['📦 Produkte', '💰 Preise', '🔧 Support', '📞 Kontakt']
+                bayiLoginBtn: 'Händler Login',
+                bayiLoginTitle: '🔐 Händler Login',
+                bayiLoginSubtitle: 'Anmelden für exklusive Inhalte',
+                emailLabel: 'E-Mail-Adresse',
+                emailPlaceholder: 'beispiel@firma.com',
+                passwordLabel: 'Passwort',
+                passwordPlaceholder: '••••••••',
+                cancelBtn: 'Abbrechen',
+                loginBtn: 'Anmelden',
+                logoutTitle: '👋 Abmelden',
+                logoutMessage: 'Möchten Sie sich wirklich abmelden?',
+                logoutBtn: 'Abmelden',
+                logoutSuccess: 'Erfolgreich abgemeldet. Bis bald! 👋',
+                welcomeMessage: ' Händler! Wie kann ich Ihnen helfen?',
+                errorFillFields: 'Bitte füllen Sie alle Felder aus',
+                errorWrongCredentials: 'Falsche E-Mail oder Passwort!',
+                errorLoginFailed: 'Beim Anmelden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
+                quickReplies: [
+                    { icon: '📦', text: 'Produkte', query: 'Produktinformationen' },
+                    { icon: '💰', text: 'Preise', query: 'Preisliste' },
+                    { icon: '🔧', text: 'Support', query: 'Technischer Support' },
+                    { icon: '📞', text: 'Kontakt', query: 'Kontakt' }
+                ]
             }
         };
 
@@ -1281,6 +1333,7 @@
             currentLang = lang;
             const trans = translations[lang];
             
+            // Update main UI
             document.getElementById('botName').textContent = trans.botName;
             document.getElementById('statusText').textContent = trans.statusText;
             document.getElementById('welcomeTitle').textContent = trans.welcomeTitle;
@@ -1288,7 +1341,45 @@
             document.getElementById('messageInput').placeholder = trans.placeholder;
             document.getElementById('widgetTooltip').textContent = trans.tooltip;
             
+            // Update bayi login button if not logged in
+            if (!isBayiMode) {
+                document.getElementById('bayiLoginBtn').innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
+            }
+            
+            // Update login modal
+            document.querySelector('#bayiModal .modal-header h3').textContent = trans.bayiLoginTitle;
+            document.querySelector('#bayiModal .modal-header p').textContent = trans.bayiLoginSubtitle;
+            document.querySelector('label[for="bayiEmail"]').textContent = trans.emailLabel;
+            document.querySelector('label[for="bayiPassword"]').textContent = trans.passwordLabel;
+            document.getElementById('bayiEmail').placeholder = trans.emailPlaceholder;
+            document.getElementById('bayiPassword').placeholder = trans.passwordPlaceholder;
+            document.querySelector('#bayiModal .btn-secondary').innerHTML = trans.cancelBtn;
+            document.querySelector('#bayiModal .btn-primary').innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + trans.loginBtn;
+            
+            // Update logout modal
+            document.querySelector('#bayiLogoutModal .modal-header h3').textContent = trans.logoutTitle;
+            document.querySelector('#bayiLogoutModal .btn-secondary').innerHTML = trans.cancelBtn;
+            document.querySelector('#bayiLogoutModal .btn-primary').innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + trans.logoutBtn;
+            
+            // Update quick replies
+            updateQuickReplies();
+            
             document.getElementById('langDropdown').classList.remove('active');
+        }
+        
+        // Update Quick Replies based on current language
+        function updateQuickReplies() {
+            const trans = translations[currentLang];
+            const quickRepliesDiv = document.getElementById('quickReplies');
+            
+            quickRepliesDiv.innerHTML = '';
+            trans.quickReplies.forEach(reply => {
+                const button = document.createElement('button');
+                button.className = 'quick-reply';
+                button.textContent = reply.icon + ' ' + reply.text;
+                button.onclick = () => sendQuickReply(reply.query);
+                quickRepliesDiv.appendChild(button);
+            });
         }
 
         // Toggle Dark Mode
@@ -1301,10 +1392,12 @@
 
         // Show Bayi Login
         function showBayiLogin() {
+            const trans = translations[currentLang];
+            
             if (isBayiMode) {
                 // Already logged in, show logout modal
                 document.getElementById('logoutMessage').textContent = 
-                    `${bayiCompanyName} hesabından çıkmak istediğinize emin misiniz?`;
+                    `${bayiCompanyName} ${trans.logoutMessage}`;
                 document.getElementById('bayiLogoutModal').classList.add('active');
             } else {
                 // Not logged in, show login modal
@@ -1328,6 +1421,8 @@
 
         // Bayi Logout
         function bayiLogout() {
+            const trans = translations[currentLang];
+            
             // Clear all bayi data
             isBayiMode = false;
             currentWebhook = NORMAL_WEBHOOK;
@@ -1343,9 +1438,9 @@
             
             // Reset button to original state
             const bayiBtn = document.getElementById('bayiLoginBtn');
-            bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> Bayi Giriş';
+            bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
             bayiBtn.classList.remove('logged-in');
-            bayiBtn.title = 'Bayi Girişi';
+            bayiBtn.title = trans.bayiLoginTitle;
             bayiBtn.onclick = showBayiLogin;
             
             // Close modal
@@ -1356,13 +1451,13 @@
             messagesDiv.innerHTML = `
                 <div class="welcome-message">
                     <div class="welcome-icon">👋</div>
-                    <h3 id="welcomeTitle">Hoş Geldiniz!</h3>
-                    <p id="welcomeText">Size nasıl yardımcı olabilirim?</p>
+                    <h3 id="welcomeTitle">${trans.welcomeTitle}</h3>
+                    <p id="welcomeText">${trans.welcomeText}</p>
                 </div>
             `;
             
             // Show success message
-            addMessage('bot', 'Başarıyla çıkış yaptınız. Tekrar görüşmek üzere! 👋');
+            addMessage('bot', trans.logoutSuccess);
             
             playSound('success');
         }
@@ -1376,11 +1471,12 @@
 
         // Bayi Login
         async function bayiLogin() {
+            const trans = translations[currentLang];
             const email = document.getElementById('bayiEmail').value.trim();
             const password = document.getElementById('bayiPassword').value.trim();
             
             if (!email || !password) {
-                showError('Lütfen tüm alanları doldurun');
+                showError(trans.errorFillFields);
                 return;
             }
             
@@ -1401,7 +1497,7 @@
                 document.getElementById('loading').classList.remove('active');
                 
                 if (error || !data) {
-                    showError('E-posta veya şifre hatalı!');
+                    showError(trans.errorWrongCredentials);
                     return;
                 }
                 
@@ -1416,14 +1512,14 @@
                 const bayiBtn = document.getElementById('bayiLoginBtn');
                 bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
                 bayiBtn.classList.add('logged-in');
-                bayiBtn.title = 'Çıkış Yap: ' + data.company_name;
+                bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
                 bayiBtn.onclick = showBayiLogin; // Will show logout modal when clicked
                 
                 // Close modal
                 closeBayiModal();
                 
                 // Send welcome message
-                addMessage('bot', `Hoşgeldin ${bayiCompanyName} bayimiz! Size nasıl yardımcı olabilirim?`);
+                addMessage('bot', `${trans.welcomeTitle.replace('!', '')} ${data.company_name}${trans.welcomeMessage}`);
                 
                 // Play sound
                 playSound('success');
@@ -1437,7 +1533,7 @@
             } catch (error) {
                 console.error('Login error:', error);
                 document.getElementById('loading').classList.remove('active');
-                showError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
+                showError(trans.errorLoginFailed);
             }
         }
 
@@ -1457,9 +1553,9 @@
             // Show typing indicator
             showTyping();
             
-            // Prepare request body
+            // Prepare request body - ✅ BURADA DEĞİŞİKLİK YAPILDI
             const requestBody = {
-                message: message,
+                chatInput: message,  // ✅ DEĞİŞTİ: "message" yerine "chatInput" kullanıldı
                 sessionId: sessionId,
                 userType: isBayiMode ? 'bayi' : 'normal',
                 language: currentLang,
@@ -1602,10 +1698,11 @@
                         bayiEmail = data.email;
                         sessionId = savedSessionId || ('bayi_' + data.id + '_' + Date.now());
                         
+                        const trans = translations[currentLang];
                         const bayiBtn = document.getElementById('bayiLoginBtn');
                         bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
                         bayiBtn.classList.add('logged-in');
-                        bayiBtn.title = 'Çıkış Yap: ' + data.company_name;
+                        bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
                         bayiBtn.onclick = showBayiLogin;
                     }
                 } catch (error) {
@@ -1628,6 +1725,9 @@
             const browserLang = navigator.language.substring(0, 2);
             if (translations[browserLang]) {
                 setLanguage(browserLang);
+            } else {
+                // Default to Turkish and initialize quick replies
+                updateQuickReplies();
             }
             
             // Show tooltip after 3 seconds
