@@ -1284,18 +1284,22 @@
             const widgetButton = document.getElementById('widgetButton');
             const widgetIcon = document.getElementById('widgetIcon');
             const tooltip = document.getElementById('widgetTooltip');
+            const notificationBadge = document.getElementById('notificationBadge');
+            
+            if (!chatWindow || !widgetButton || !widgetIcon) return;
             
             if (isOpen) {
                 chatWindow.classList.add('active');
                 widgetButton.classList.add('active');
                 widgetIcon.className = 'fas fa-times';
-                tooltip.classList.remove('show');
-                document.getElementById('notificationBadge').classList.remove('show');
+                if (tooltip) tooltip.classList.remove('show');
+                if (notificationBadge) notificationBadge.classList.remove('show');
                 hasNewMessage = false;
                 
                 // Focus input
                 setTimeout(() => {
-                    document.getElementById('messageInput').focus();
+                    const messageInput = document.getElementById('messageInput');
+                    if (messageInput) messageInput.focus();
                 }, 300);
             } else {
                 chatWindow.classList.remove('active');
@@ -1310,15 +1314,18 @@
                 event.stopPropagation();
             }
             const dropdown = document.getElementById('langDropdown');
+            if (!dropdown) return;
+            
             const isActive = dropdown.classList.contains('active');
             
             if (!isActive) {
                 // Position dropdown relative to the button
-                const btn = event.target.closest('.lang-btn');
-                const rect = btn.getBoundingClientRect();
-                
-                dropdown.style.top = (rect.bottom + 8) + 'px';
-                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                const btn = event ? event.target.closest('.lang-btn') : null;
+                if (btn) {
+                    const rect = btn.getBoundingClientRect();
+                    dropdown.style.top = (rect.bottom + 8) + 'px';
+                    dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                }
                 dropdown.classList.add('active');
             } else {
                 dropdown.classList.remove('active');
@@ -1333,44 +1340,68 @@
             currentLang = lang;
             const trans = translations[lang];
             
-            // Update main UI
-            document.getElementById('botName').textContent = trans.botName;
-            document.getElementById('statusText').textContent = trans.statusText;
-            document.getElementById('welcomeTitle').textContent = trans.welcomeTitle;
-            document.getElementById('welcomeText').textContent = trans.welcomeText;
-            document.getElementById('messageInput').placeholder = trans.placeholder;
-            document.getElementById('widgetTooltip').textContent = trans.tooltip;
+            // Update main UI - with null checks
+            const botName = document.getElementById('botName');
+            const statusText = document.getElementById('statusText');
+            const welcomeTitle = document.getElementById('welcomeTitle');
+            const welcomeText = document.getElementById('welcomeText');
+            const messageInput = document.getElementById('messageInput');
+            const widgetTooltip = document.getElementById('widgetTooltip');
+            
+            if (botName) botName.textContent = trans.botName;
+            if (statusText) statusText.textContent = trans.statusText;
+            if (welcomeTitle) welcomeTitle.textContent = trans.welcomeTitle;
+            if (welcomeText) welcomeText.textContent = trans.welcomeText;
+            if (messageInput) messageInput.placeholder = trans.placeholder;
+            if (widgetTooltip) widgetTooltip.textContent = trans.tooltip;
             
             // Update bayi login button if not logged in
             if (!isBayiMode) {
-                document.getElementById('bayiLoginBtn').innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
+                const bayiBtn = document.getElementById('bayiLoginBtn');
+                if (bayiBtn) bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
             }
             
-            // Update login modal
-            document.querySelector('#bayiModal .modal-header h3').textContent = trans.bayiLoginTitle;
-            document.querySelector('#bayiModal .modal-header p').textContent = trans.bayiLoginSubtitle;
-            document.querySelector('label[for="bayiEmail"]').textContent = trans.emailLabel;
-            document.querySelector('label[for="bayiPassword"]').textContent = trans.passwordLabel;
-            document.getElementById('bayiEmail').placeholder = trans.emailPlaceholder;
-            document.getElementById('bayiPassword').placeholder = trans.passwordPlaceholder;
-            document.querySelector('#bayiModal .btn-secondary').innerHTML = trans.cancelBtn;
-            document.querySelector('#bayiModal .btn-primary').innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + trans.loginBtn;
+            // Update login modal - with null checks
+            const modalTitle = document.querySelector('#bayiModal .modal-header h3');
+            const modalSubtitle = document.querySelector('#bayiModal .modal-header p');
+            const emailLabel = document.querySelector('label[for="bayiEmail"]');
+            const passwordLabel = document.querySelector('label[for="bayiPassword"]');
+            const bayiEmail = document.getElementById('bayiEmail');
+            const bayiPassword = document.getElementById('bayiPassword');
+            const modalCancelBtn = document.querySelector('#bayiModal .btn-secondary');
+            const modalLoginBtn = document.querySelector('#bayiModal .btn-primary');
             
-            // Update logout modal
-            document.querySelector('#bayiLogoutModal .modal-header h3').textContent = trans.logoutTitle;
-            document.querySelector('#bayiLogoutModal .btn-secondary').innerHTML = trans.cancelBtn;
-            document.querySelector('#bayiLogoutModal .btn-primary').innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + trans.logoutBtn;
+            if (modalTitle) modalTitle.textContent = trans.bayiLoginTitle;
+            if (modalSubtitle) modalSubtitle.textContent = trans.bayiLoginSubtitle;
+            if (emailLabel) emailLabel.textContent = trans.emailLabel;
+            if (passwordLabel) passwordLabel.textContent = trans.passwordLabel;
+            if (bayiEmail) bayiEmail.placeholder = trans.emailPlaceholder;
+            if (bayiPassword) bayiPassword.placeholder = trans.passwordPlaceholder;
+            if (modalCancelBtn) modalCancelBtn.innerHTML = trans.cancelBtn;
+            if (modalLoginBtn) modalLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + trans.loginBtn;
+            
+            // Update logout modal - with null checks
+            const logoutTitle = document.querySelector('#bayiLogoutModal .modal-header h3');
+            const logoutCancelBtn = document.querySelector('#bayiLogoutModal .btn-secondary');
+            const logoutBtn = document.querySelector('#bayiLogoutModal .btn-primary');
+            
+            if (logoutTitle) logoutTitle.textContent = trans.logoutTitle;
+            if (logoutCancelBtn) logoutCancelBtn.innerHTML = trans.cancelBtn;
+            if (logoutBtn) logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + trans.logoutBtn;
             
             // Update quick replies
             updateQuickReplies();
             
-            document.getElementById('langDropdown').classList.remove('active');
+            const langDropdown = document.getElementById('langDropdown');
+            if (langDropdown) langDropdown.classList.remove('active');
         }
         
         // Update Quick Replies based on current language
         function updateQuickReplies() {
             const trans = translations[currentLang];
             const quickRepliesDiv = document.getElementById('quickReplies');
+            
+            if (!quickRepliesDiv) return; // Null check
             
             quickRepliesDiv.innerHTML = '';
             trans.quickReplies.forEach(reply => {
@@ -1387,7 +1418,9 @@
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode');
             const icon = document.getElementById('themeIcon');
-            icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            if (icon) {
+                icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            }
         }
 
         // Show Bayi Login
@@ -1396,27 +1429,40 @@
             
             if (isBayiMode) {
                 // Already logged in, show logout modal
-                document.getElementById('logoutMessage').textContent = 
-                    `${bayiCompanyName} ${trans.logoutMessage}`;
-                document.getElementById('bayiLogoutModal').classList.add('active');
+                const logoutMessage = document.getElementById('logoutMessage');
+                if (logoutMessage) {
+                    logoutMessage.textContent = `${bayiCompanyName} ${trans.logoutMessage}`;
+                }
+                const logoutModal = document.getElementById('bayiLogoutModal');
+                if (logoutModal) logoutModal.classList.add('active');
             } else {
                 // Not logged in, show login modal
-                document.getElementById('bayiModal').classList.add('active');
-                document.getElementById('errorMessage').classList.remove('show');
+                const loginModal = document.getElementById('bayiModal');
+                if (loginModal) loginModal.classList.add('active');
+                const errorMessage = document.getElementById('errorMessage');
+                if (errorMessage) errorMessage.classList.remove('show');
             }
         }
 
         // Close Bayi Modal
         function closeBayiModal() {
-            document.getElementById('bayiModal').classList.remove('active');
-            document.getElementById('bayiEmail').value = '';
-            document.getElementById('bayiPassword').value = '';
-            document.getElementById('errorMessage').classList.remove('show');
+            const modal = document.getElementById('bayiModal');
+            if (modal) modal.classList.remove('active');
+            
+            const emailInput = document.getElementById('bayiEmail');
+            if (emailInput) emailInput.value = '';
+            
+            const passwordInput = document.getElementById('bayiPassword');
+            if (passwordInput) passwordInput.value = '';
+            
+            const errorMessage = document.getElementById('errorMessage');
+            if (errorMessage) errorMessage.classList.remove('show');
         }
 
         // Close Bayi Logout Modal
         function closeBayiLogoutModal() {
-            document.getElementById('bayiLogoutModal').classList.remove('active');
+            const modal = document.getElementById('bayiLogoutModal');
+            if (modal) modal.classList.remove('active');
         }
 
         // Bayi Logout
@@ -1438,23 +1484,27 @@
             
             // Reset button to original state
             const bayiBtn = document.getElementById('bayiLoginBtn');
-            bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
-            bayiBtn.classList.remove('logged-in');
-            bayiBtn.title = trans.bayiLoginTitle;
-            bayiBtn.onclick = showBayiLogin;
+            if (bayiBtn) {
+                bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> ' + trans.bayiLoginBtn;
+                bayiBtn.classList.remove('logged-in');
+                bayiBtn.title = trans.bayiLoginTitle;
+                bayiBtn.onclick = showBayiLogin;
+            }
             
             // Close modal
             closeBayiLogoutModal();
             
             // Clear chat messages
             const messagesDiv = document.getElementById('chatMessages');
-            messagesDiv.innerHTML = `
-                <div class="welcome-message">
-                    <div class="welcome-icon">👋</div>
-                    <h3 id="welcomeTitle">${trans.welcomeTitle}</h3>
-                    <p id="welcomeText">${trans.welcomeText}</p>
-                </div>
-            `;
+            if (messagesDiv) {
+                messagesDiv.innerHTML = `
+                    <div class="welcome-message">
+                        <div class="welcome-icon">👋</div>
+                        <h3 id="welcomeTitle">${trans.welcomeTitle}</h3>
+                        <p id="welcomeText">${trans.welcomeText}</p>
+                    </div>
+                `;
+            }
             
             // Show success message
             addMessage('bot', trans.logoutSuccess);
@@ -1465,15 +1515,23 @@
         // Show Error Message
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.classList.add('show');
+            }
         }
 
         // Bayi Login
         async function bayiLogin() {
             const trans = translations[currentLang];
-            const email = document.getElementById('bayiEmail').value.trim();
-            const password = document.getElementById('bayiPassword').value.trim();
+            const emailInput = document.getElementById('bayiEmail');
+            const passwordInput = document.getElementById('bayiPassword');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!emailInput || !passwordInput) return;
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
             
             if (!email || !password) {
                 showError(trans.errorFillFields);
@@ -1481,7 +1539,7 @@
             }
             
             // Show loading
-            document.getElementById('loading').classList.add('active');
+            if (loadingDiv) loadingDiv.classList.add('active');
             
             try {
                 // Query Supabase for bayi user
@@ -1494,7 +1552,7 @@
                     .single();
                 
                 // Hide loading
-                document.getElementById('loading').classList.remove('active');
+                if (loadingDiv) loadingDiv.classList.remove('active');
                 
                 if (error || !data) {
                     showError(trans.errorWrongCredentials);
@@ -1510,10 +1568,12 @@
                 
                 // Update bayi button to show logged in status
                 const bayiBtn = document.getElementById('bayiLoginBtn');
-                bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
-                bayiBtn.classList.add('logged-in');
-                bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
-                bayiBtn.onclick = showBayiLogin; // Will show logout modal when clicked
+                if (bayiBtn) {
+                    bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
+                    bayiBtn.classList.add('logged-in');
+                    bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
+                    bayiBtn.onclick = showBayiLogin; // Will show logout modal when clicked
+                }
                 
                 // Close modal
                 closeBayiModal();
@@ -1532,7 +1592,7 @@
                 
             } catch (error) {
                 console.error('Login error:', error);
-                document.getElementById('loading').classList.remove('active');
+                if (loadingDiv) loadingDiv.classList.remove('active');
                 showError(trans.errorLoginFailed);
             }
         }
@@ -1540,6 +1600,8 @@
         // Send Message
         async function sendMessage() {
             const input = document.getElementById('messageInput');
+            if (!input) return;
+            
             const message = input.value.trim();
             
             if (!message) return;
@@ -1553,9 +1615,9 @@
             // Show typing indicator
             showTyping();
             
-            // Prepare request body - ✅ BURADA DEĞİŞİKLİK YAPILDI
+            // Prepare request body
             const requestBody = {
-                chatInput: message,  // ✅ DEĞİŞTİ: "message" yerine "chatInput" kullanıldı
+                chatInput: message,
                 sessionId: sessionId,
                 userType: isBayiMode ? 'bayi' : 'normal',
                 language: currentLang,
@@ -1570,6 +1632,9 @@
             
             // Send to webhook
             try {
+                console.log('🚀 Sending to webhook:', currentWebhook);
+                console.log('📤 Request body:', requestBody);
+                
                 const response = await fetch(currentWebhook, {
                     method: 'POST',
                     headers: {
@@ -1578,49 +1643,70 @@
                     body: JSON.stringify(requestBody)
                 });
                 
-                const data = await response.json();
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response headers:', response.headers);
                 
-                // ✅ DEBUG: N8n'den gelen yanıtı konsola yazdır
-                console.log('N8N Response:', data);
-                console.log('Response keys:', Object.keys(data));
+                const responseText = await response.text();
+                console.log('📥 Response text:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('✅ Parsed JSON:', data);
+                } catch (e) {
+                    console.error('❌ JSON parse error:', e);
+                    console.log('Raw response:', responseText);
+                    hideTyping();
+                    addMessage('bot', 'Yanıt formatı hatalı.');
+                    return;
+                }
                 
                 // Hide typing indicator
                 hideTyping();
                 
-                // ✅ N8n'den gelen yanıtı al (öncelik sırası: output -> response -> message -> diğerleri)
-                let botResponse = data.output || 
-                                 data.response || 
-                                 data.message || 
-                                 data.text || 
-                                 data.reply || 
-                                 data.answer ||
-                                 (data.data && data.data.output) ||
-                                 (data.data && data.data.response) ||
-                                 (data.data && data.data.message) ||
-                                 'Yanıt alınamadı.';
+                // ✅ N8n'den gelen yanıtı al - TÜM OLASI FİELD'LARI KONTROL ET
+                let botResponse = null;
                 
-                console.log('Bot Response:', botResponse);
+                // Direct fields
+                if (data.output) botResponse = data.output;
+                else if (data.response) botResponse = data.response;
+                else if (data.message) botResponse = data.message;
+                else if (data.text) botResponse = data.text;
+                else if (data.reply) botResponse = data.reply;
+                else if (data.answer) botResponse = data.answer;
+                // Nested in data object
+                else if (data.data && data.data.output) botResponse = data.data.output;
+                else if (data.data && data.data.response) botResponse = data.data.response;
+                else if (data.data && data.data.message) botResponse = data.data.message;
                 
-                // Add bot response
-                addMessage('bot', botResponse);
+                console.log('🤖 Bot Response:', botResponse);
+                
+                if (!botResponse || botResponse === '') {
+                    console.error('❌ No valid response found in:', data);
+                    addMessage('bot', 'Yanıt alınamadı. (Response boş)');
+                } else {
+                    addMessage('bot', botResponse);
+                }
                 
                 // Play sound and show notification if window is not open
                 if (!isOpen) {
-                    document.getElementById('notificationBadge').classList.add('show');
+                    const notificationBadge = document.getElementById('notificationBadge');
+                    if (notificationBadge) notificationBadge.classList.add('show');
                     hasNewMessage = true;
                 }
                 playSound('message');
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Fetch error:', error);
                 hideTyping();
-                addMessage('bot', 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.');
+                addMessage('bot', 'Üzgünüm, bir hata oluştu: ' + error.message);
             }
         }
 
         // Add Message to Chat
         function addMessage(sender, text) {
             const messagesDiv = document.getElementById('chatMessages');
+            if (!messagesDiv) return;
             
             // Remove welcome message if exists
             const welcome = document.querySelector('.welcome-message');
@@ -1650,8 +1736,11 @@
 
         // Quick Reply
         function sendQuickReply(text) {
-            document.getElementById('messageInput').value = text;
-            sendMessage();
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.value = text;
+                sendMessage();
+            }
         }
 
         // Handle Enter Key
@@ -1664,24 +1753,30 @@
 
         // Show/Hide Typing
         function showTyping() {
-            document.getElementById('typingIndicator').classList.add('active');
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) typingIndicator.classList.add('active');
         }
 
         function hideTyping() {
-            document.getElementById('typingIndicator').classList.remove('active');
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) typingIndicator.classList.remove('active');
         }
 
         // Toggle Emoji Picker
         function toggleEmoji() {
-            document.getElementById('emojiPicker').classList.toggle('active');
+            const emojiPicker = document.getElementById('emojiPicker');
+            if (emojiPicker) emojiPicker.classList.toggle('active');
         }
 
         // Add Emoji
         function addEmoji(emoji) {
             const input = document.getElementById('messageInput');
-            input.value += emoji;
-            input.focus();
-            document.getElementById('emojiPicker').classList.remove('active');
+            if (input) {
+                input.value += emoji;
+                input.focus();
+            }
+            const emojiPicker = document.getElementById('emojiPicker');
+            if (emojiPicker) emojiPicker.classList.remove('active');
         }
 
         // Play Sound
@@ -1718,10 +1813,12 @@
                         
                         const trans = translations[currentLang];
                         const bayiBtn = document.getElementById('bayiLoginBtn');
-                        bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
-                        bayiBtn.classList.add('logged-in');
-                        bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
-                        bayiBtn.onclick = showBayiLogin;
+                        if (bayiBtn) {
+                            bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
+                            bayiBtn.classList.add('logged-in');
+                            bayiBtn.title = trans.logoutTitle + ': ' + data.company_name;
+                            bayiBtn.onclick = showBayiLogin;
+                        }
                     }
                 } catch (error) {
                     console.log('Session validation failed:', error);
@@ -1750,13 +1847,14 @@
             
             // Show tooltip after 3 seconds
             setTimeout(() => {
-                if (!isOpen && !localStorage.getItem('tooltipShown')) {
-                    document.getElementById('widgetTooltip').classList.add('show');
+                const tooltip = document.getElementById('widgetTooltip');
+                if (!isOpen && !localStorage.getItem('tooltipShown') && tooltip) {
+                    tooltip.classList.add('show');
                     localStorage.setItem('tooltipShown', 'true');
                     
                     // Hide after 5 seconds
                     setTimeout(() => {
-                        document.getElementById('widgetTooltip').classList.remove('show');
+                        tooltip.classList.remove('show');
                     }, 5000);
                 }
             }, 3000);
@@ -1764,16 +1862,21 @@
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
+            const langDropdown = document.getElementById('langDropdown');
+            const emojiPicker = document.getElementById('emojiPicker');
+            const bayiModal = document.getElementById('bayiModal');
+            const bayiLogoutModal = document.getElementById('bayiLogoutModal');
+            
             if (!e.target.closest('.lang-btn') && !e.target.closest('.lang-dropdown')) {
-                document.getElementById('langDropdown').classList.remove('active');
+                if (langDropdown) langDropdown.classList.remove('active');
             }
             if (!e.target.closest('.input-wrapper')) {
-                document.getElementById('emojiPicker').classList.remove('active');
+                if (emojiPicker) emojiPicker.classList.remove('active');
             }
             // Close modals when clicking outside
             if (e.target.classList.contains('modal')) {
-                document.getElementById('bayiModal').classList.remove('active');
-                document.getElementById('bayiLogoutModal').classList.remove('active');
+                if (bayiModal) bayiModal.classList.remove('active');
+                if (bayiLogoutModal) bayiLogoutModal.classList.remove('active');
             }
         });
 
