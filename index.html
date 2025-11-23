@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium AI ChatBot Widget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --border-radius: 20px;
+        }
+
+        /* Widget Container - Fixed Position */
+        #chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* Floating Action Button */
+        .chat-widget-button {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+            }
+        }
+
+        .chat-widget-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .chat-widget-button.active {
+            animation: none;
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        }
+
+        .chat-widget-button i {
+            font-size: 28px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .chat-widget-button.active i {
+            transform: rotate(90deg);
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--danger);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            animation: bounce 1s infinite;
+            display: none;
+        }
+
+        .notification-badge.show {
+            display: flex;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Welcome Tooltip */
+        .widget-tooltip {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
+            font-size: 14px;
+            color: var(--text-dark);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .widget-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .widget-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 25px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            transform: rotate(45deg);
+            box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Chat Window */
+        .chat-window {
+            position: absolute;
+            bottom: 85px;
+            right: 0;
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            #chatbot-widget {
+                bottom: 0;
+                right: 0;
+                left: 0;
+                top: 0;
+            }
+            
+            .chat-window {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                border-radius: 0;
+            }
+
+            .chat-widget-button {
+                bottom: 20px;
+                right: 20px;
+                position: fixed;
+            }
+
+            #bayiLoginBtn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .header-actions {
+                gap: 6px;
+            }
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+            flex-shrink: 0;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            100% {
+                left: 100%;
+            }
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .bot-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .bot-status {
+            font-size: 11px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .minimize-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        /* Bayi Login Button - More Prominent */
+        #bayiLoginBtn {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            animation: bayiPulse 2s infinite;
+        }
+
+        #bayiLoginBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+        }
+
+        #bayiLoginBtn i {
+            margin-right: 4px;
+        }
+
+        @keyframes bayiPulse {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(251, 191, 36, 0.6);
+            }
+        }
+
+        /* Bayi logged in state */
+        #bayiLoginBtn.logged-in {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            animation: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Language Selector */
+        .lang-btn {
+            position: relative;
+        }
+
+        .lang-dropdown {
+            position: fixed;
+            background: white;
+            color: var(--text-dark);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-width: 160px;
+            display: none;
+            z-index: 99999;
+            overflow: hidden;
+        }
+
+        .lang-dropdown.active {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .lang-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .lang-option:hover {
+            background: var(--light);
+        }
+
+        /* Chat Messages */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            animation: messageIn 0.3s ease;
+            max-width: 85%;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: var(--dark);
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 10px 14px;
+            border-radius: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 0 20px;
+            margin-bottom: 10px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Chat Input */
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            border-radius: 25px;
+            padding: 4px 15px;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .chat-input input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .input-btn:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Quick Replies */
+        .quick-replies {
+            padding: 8px 15px;
+            background: white;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            border-top: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        .quick-replies::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .quick-replies::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .quick-reply {
+            background: var(--light);
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 15px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .quick-reply:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 320px;
+            animation: modalIn 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--text-dark);
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .modal-header p {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+            transform: scale(1.1);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .welcome-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+            animation: wave 1.5s ease infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-10deg);
+            }
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        /* Dark Mode */
+        .dark-mode .chat-window {
+            background: #1e293b;
+        }
+
+        .dark-mode .chat-messages {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+        }
+
+        .dark-mode .message-content {
+            background: #334155;
+            color: #f8fafc;
+        }
+
+        .dark-mode .chat-input {
+            background: #1e293b;
+            border-top-color: #334155;
+        }
+
+        .dark-mode .input-wrapper {
+            background: #334155;
+        }
+
+        .dark-mode .chat-input input {
+            color: #f8fafc;
+        }
+
+        .dark-mode .modal-content {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .dark-mode .form-group input {
+            background: #334155;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+
+        .dark-mode .quick-replies {
+            background: #1e293b;
+            border-top-color: #334155;
+        }
+
+        .dark-mode .quick-reply {
+            background: #334155;
+            color: #f8fafc;
+            border-color: #475569;
+        }
+
+        .dark-mode .widget-tooltip {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .dark-mode .widget-tooltip::after {
+            background: #1e293b;
+        }
+
+        .dark-mode .lang-dropdown {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .dark-mode .lang-option:hover {
+            background: #334155;
+        }
+
+        /* Emoji Picker */
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 8px;
+            display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+            z-index: 100;
+        }
+
+        .emoji-picker.active {
+            display: grid;
+        }
+
+        .emoji {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+
+        .emoji:hover {
+            background: var(--light);
+            transform: scale(1.2);
+        }
+
+        .dark-mode .emoji-picker {
+            background: #334155;
+        }
+
+        .dark-mode .emoji:hover {
+            background: #475569;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid var(--light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Chatbot Widget Container -->
+    <div id="chatbot-widget">
+        <!-- Floating Action Button -->
+        <button class="chat-widget-button" id="widgetButton" onclick="toggleChat()">
+            <i class="fas fa-comment-dots" id="widgetIcon"></i>
+            <span class="notification-badge" id="notificationBadge">1</span>
+        </button>
+        
+        <!-- Welcome Tooltip -->
+        <div class="widget-tooltip" id="widgetTooltip">
+            👋 Merhaba! Size nasıl yardımcı olabilirim?
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="header-left">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="bot-info">
+                        <h3 id="botName">AI Assistant</h3>
+                        <div class="bot-status">
+                            <span class="status-dot"></span>
+                            <span id="statusText">Online</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn lang-btn" onclick="toggleLanguage(event)" title="Dil / Language">
+                        <i class="fas fa-language"></i>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option" onclick="setLanguage('tr', event)">
+                            <span>🇹🇷</span> Türkçe
+                        </div>
+                        <div class="lang-option" onclick="setLanguage('en', event)">
+                            <span>🇬🇧</span> English
+                        </div>
+                        <div class="lang-option" onclick="setLanguage('de', event)">
+                            <span>🇩🇪</span> Deutsch
+                        </div>
+                    </div>
+                    <button class="header-btn" onclick="toggleDarkMode()" title="Tema">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button class="header-btn" id="bayiLoginBtn" onclick="showBayiLogin()" title="Bayi Girişi">
+                        <i class="fas fa-user-tie"></i> Bayi Giriş
+                    </button>
+                    <button class="header-btn minimize-btn" onclick="toggleChat()" title="Kapat">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">👋</div>
+                    <h3 id="welcomeTitle">Hoş Geldiniz!</h3>
+                    <p id="welcomeText">Size nasıl yardımcı olabilirim?</p>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">🤖</div>
+                <div class="typing-dots">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+
+            <!-- Quick Replies -->
+            <div class="quick-replies" id="quickReplies">
+                <button class="quick-reply" onclick="sendQuickReply('Ürünler hakkında bilgi')">
+                    📦 Ürünler
+                </button>
+                <button class="quick-reply" onclick="sendQuickReply('Fiyat listesi')">
+                    💰 Fiyatlar
+                </button>
+                <button class="quick-reply" onclick="sendQuickReply('Teknik destek')">
+                    🔧 Destek
+                </button>
+                <button class="quick-reply" onclick="sendQuickReply('İletişim')">
+                    📞 İletişim
+                </button>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." onkeypress="handleKeyPress(event)">
+                    <div class="input-actions">
+                        <button class="input-btn" onclick="toggleEmoji()" title="Emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                    </div>
+                    <!-- Emoji Picker -->
+                    <div class="emoji-picker" id="emojiPicker">
+                        <span class="emoji" onclick="addEmoji('😊')">😊</span>
+                        <span class="emoji" onclick="addEmoji('👍')">👍</span>
+                        <span class="emoji" onclick="addEmoji('❤️')">❤️</span>
+                        <span class="emoji" onclick="addEmoji('🎉')">🎉</span>
+                        <span class="emoji" onclick="addEmoji('😎')">😎</span>
+                        <span class="emoji" onclick="addEmoji('🤔')">🤔</span>
+                        <span class="emoji" onclick="addEmoji('👏')">👏</span>
+                        <span class="emoji" onclick="addEmoji('🔥')">🔥</span>
+                        <span class="emoji" onclick="addEmoji('💪')">💪</span>
+                        <span class="emoji" onclick="addEmoji('🙏')">🙏</span>
+                        <span class="emoji" onclick="addEmoji('😂')">😂</span>
+                        <span class="emoji" onclick="addEmoji('🚀')">🚀</span>
+                    </div>
+                </div>
+                <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Bayi Login Modal -->
+            <div class="modal" id="bayiModal">
+                <div class="modal-content">
+                    <button class="close-modal" onclick="closeBayiModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="modal-header">
+                        <h3>🔐 Bayi Girişi</h3>
+                        <p>Özel içeriklere erişmek için giriş yapın</p>
+                    </div>
+                    <div class="error-message" id="errorMessage"></div>
+                    <div class="form-group">
+                        <label for="bayiEmail">E-posta Adresi</label>
+                        <input type="email" id="bayiEmail" placeholder="ornek@sirket.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="bayiPassword">Şifre</label>
+                        <input type="password" id="bayiPassword" placeholder="••••••••">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="closeBayiModal()">İptal</button>
+                        <button class="btn btn-primary" onclick="bayiLogin()">
+                            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bayi Logout Modal -->
+            <div class="modal" id="bayiLogoutModal">
+                <div class="modal-content">
+                    <button class="close-modal" onclick="closeBayiLogoutModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="modal-header">
+                        <h3>👋 Çıkış Yap</h3>
+                        <p id="logoutMessage">Bayi hesabından çıkmak istediğinize emin misiniz?</p>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="closeBayiLogoutModal()">İptal</button>
+                        <button class="btn btn-primary" onclick="bayiLogout()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== SUPABASE CONFIGURATION ==========
+        const SUPABASE_URL = 'https://roczgbxohxbhhxnqgect.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvY3pnYnhvaHhiaGh4bnFnZWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4NDE5MDgsImV4cCI6MjA3OTQxNzkwOH0.uBbgYAkIrYI5kbGCEGGl93y_UJHiEd7IYDvwkxwNLeA';
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ========== WEBHOOK URLS ==========
+        const NORMAL_WEBHOOK = 'https://neuromexago.app.n8n.cloud/webhook/d105c3ad-3488-438c-b405-b856c90ce80e/chat';
+        const BAYI_WEBHOOK = 'https://neuromexago.app.n8n.cloud/webhook/16057f15-090c-45b9-8be6-0dfbd5896cee/chat';
+
+        // Multi-language support
+        const translations = {
+            tr: {
+                botName: 'AI Asistan',
+                statusText: 'Çevrimiçi',
+                welcomeTitle: 'Hoş Geldiniz!',
+                welcomeText: 'Size nasıl yardımcı olabilirim?',
+                placeholder: 'Mesajınızı yazın...',
+                bayiLogin: 'Bayi Girişi',
+                tooltip: '👋 Merhaba! Size nasıl yardımcı olabilirim?',
+                quickReplies: ['📦 Ürünler', '💰 Fiyatlar', '🔧 Destek', '📞 İletişim']
+            },
+            en: {
+                botName: 'AI Assistant',
+                statusText: 'Online',
+                welcomeTitle: 'Welcome!',
+                welcomeText: 'How can I help you today?',
+                placeholder: 'Type your message...',
+                bayiLogin: 'Dealer Login',
+                tooltip: '👋 Hello! How can I help you?',
+                quickReplies: ['📦 Products', '💰 Prices', '🔧 Support', '📞 Contact']
+            },
+            de: {
+                botName: 'KI-Assistent',
+                statusText: 'Online',
+                welcomeTitle: 'Willkommen!',
+                welcomeText: 'Wie kann ich Ihnen helfen?',
+                placeholder: 'Nachricht eingeben...',
+                bayiLogin: 'Händler-Login',
+                tooltip: '👋 Hallo! Wie kann ich helfen?',
+                quickReplies: ['📦 Produkte', '💰 Preise', '🔧 Support', '📞 Kontakt']
+            }
+        };
+
+        // Configuration
+        let currentLang = 'tr';
+        let isDarkMode = false;
+        let isBayiMode = false;
+        let isOpen = false;
+        let currentWebhook = NORMAL_WEBHOOK;
+        let sessionId = generateSessionId();
+        let hasNewMessage = false;
+        let bayiCompanyName = '';
+        let bayiEmail = '';
+
+        // Generate unique session ID
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Toggle Chat Window
+        function toggleChat() {
+            isOpen = !isOpen;
+            const chatWindow = document.getElementById('chatWindow');
+            const widgetButton = document.getElementById('widgetButton');
+            const widgetIcon = document.getElementById('widgetIcon');
+            const tooltip = document.getElementById('widgetTooltip');
+            
+            if (isOpen) {
+                chatWindow.classList.add('active');
+                widgetButton.classList.add('active');
+                widgetIcon.className = 'fas fa-times';
+                tooltip.classList.remove('show');
+                document.getElementById('notificationBadge').classList.remove('show');
+                hasNewMessage = false;
+                
+                // Focus input
+                setTimeout(() => {
+                    document.getElementById('messageInput').focus();
+                }, 300);
+            } else {
+                chatWindow.classList.remove('active');
+                widgetButton.classList.remove('active');
+                widgetIcon.className = 'fas fa-comment-dots';
+            }
+        }
+
+        // Toggle Language Dropdown
+        function toggleLanguage(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const dropdown = document.getElementById('langDropdown');
+            const isActive = dropdown.classList.contains('active');
+            
+            if (!isActive) {
+                // Position dropdown relative to the button
+                const btn = event.target.closest('.lang-btn');
+                const rect = btn.getBoundingClientRect();
+                
+                dropdown.style.top = (rect.bottom + 8) + 'px';
+                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                dropdown.classList.add('active');
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        // Set Language
+        function setLanguage(lang, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            currentLang = lang;
+            const trans = translations[lang];
+            
+            document.getElementById('botName').textContent = trans.botName;
+            document.getElementById('statusText').textContent = trans.statusText;
+            document.getElementById('welcomeTitle').textContent = trans.welcomeTitle;
+            document.getElementById('welcomeText').textContent = trans.welcomeText;
+            document.getElementById('messageInput').placeholder = trans.placeholder;
+            document.getElementById('widgetTooltip').textContent = trans.tooltip;
+            
+            document.getElementById('langDropdown').classList.remove('active');
+        }
+
+        // Toggle Dark Mode
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('themeIcon');
+            icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Show Bayi Login
+        function showBayiLogin() {
+            if (isBayiMode) {
+                // Already logged in, show logout modal
+                document.getElementById('logoutMessage').textContent = 
+                    `${bayiCompanyName} hesabından çıkmak istediğinize emin misiniz?`;
+                document.getElementById('bayiLogoutModal').classList.add('active');
+            } else {
+                // Not logged in, show login modal
+                document.getElementById('bayiModal').classList.add('active');
+                document.getElementById('errorMessage').classList.remove('show');
+            }
+        }
+
+        // Close Bayi Modal
+        function closeBayiModal() {
+            document.getElementById('bayiModal').classList.remove('active');
+            document.getElementById('bayiEmail').value = '';
+            document.getElementById('bayiPassword').value = '';
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        // Close Bayi Logout Modal
+        function closeBayiLogoutModal() {
+            document.getElementById('bayiLogoutModal').classList.remove('active');
+        }
+
+        // Bayi Logout
+        function bayiLogout() {
+            // Clear all bayi data
+            isBayiMode = false;
+            currentWebhook = NORMAL_WEBHOOK;
+            bayiCompanyName = '';
+            bayiEmail = '';
+            sessionId = generateSessionId();
+            
+            // Clear localStorage
+            localStorage.removeItem('bayiEmail');
+            localStorage.removeItem('bayiCompanyName');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('sessionId');
+            
+            // Reset button to original state
+            const bayiBtn = document.getElementById('bayiLoginBtn');
+            bayiBtn.innerHTML = '<i class="fas fa-user-tie"></i> Bayi Giriş';
+            bayiBtn.classList.remove('logged-in');
+            bayiBtn.title = 'Bayi Girişi';
+            bayiBtn.onclick = showBayiLogin;
+            
+            // Close modal
+            closeBayiLogoutModal();
+            
+            // Clear chat messages
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.innerHTML = `
+                <div class="welcome-message">
+                    <div class="welcome-icon">👋</div>
+                    <h3 id="welcomeTitle">Hoş Geldiniz!</h3>
+                    <p id="welcomeText">Size nasıl yardımcı olabilirim?</p>
+                </div>
+            `;
+            
+            // Show success message
+            addMessage('bot', 'Başarıyla çıkış yaptınız. Tekrar görüşmek üzere! 👋');
+            
+            playSound('success');
+        }
+
+        // Show Error Message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // Bayi Login
+        async function bayiLogin() {
+            const email = document.getElementById('bayiEmail').value.trim();
+            const password = document.getElementById('bayiPassword').value.trim();
+            
+            if (!email || !password) {
+                showError('Lütfen tüm alanları doldurun');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            
+            try {
+                // Query Supabase for bayi user
+                const { data, error } = await supabase
+                    .from('bayi_users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .eq('is_active', true)
+                    .single();
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+                
+                if (error || !data) {
+                    showError('E-posta veya şifre hatalı!');
+                    return;
+                }
+                
+                // Login successful
+                isBayiMode = true;
+                currentWebhook = BAYI_WEBHOOK;
+                bayiCompanyName = data.company_name;
+                bayiEmail = data.email;
+                sessionId = 'bayi_' + data.id + '_' + Date.now();
+                
+                // Update bayi button to show logged in status
+                const bayiBtn = document.getElementById('bayiLoginBtn');
+                bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
+                bayiBtn.classList.add('logged-in');
+                bayiBtn.title = 'Çıkış Yap: ' + data.company_name;
+                bayiBtn.onclick = showBayiLogin; // Will show logout modal when clicked
+                
+                // Close modal
+                closeBayiModal();
+                
+                // Send welcome message
+                addMessage('bot', `Hoşgeldin ${bayiCompanyName} bayimiz! Size nasıl yardımcı olabilirim?`);
+                
+                // Play sound
+                playSound('success');
+                
+                // Store in localStorage
+                localStorage.setItem('bayiEmail', email);
+                localStorage.setItem('bayiCompanyName', bayiCompanyName);
+                localStorage.setItem('userType', 'bayi');
+                localStorage.setItem('sessionId', sessionId);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('loading').classList.remove('active');
+                showError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage('user', message);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            // Prepare request body
+            const requestBody = {
+                message: message,
+                sessionId: sessionId,
+                userType: isBayiMode ? 'bayi' : 'normal',
+                language: currentLang,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Add company name for bayi users
+            if (isBayiMode && bayiCompanyName) {
+                requestBody.company_name = bayiCompanyName;
+                requestBody.bayi_email = bayiEmail;
+            }
+            
+            // Send to webhook
+            try {
+                const response = await fetch(currentWebhook, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                // Hide typing indicator
+                hideTyping();
+                
+                // Add bot response
+                addMessage('bot', data.response || data.message || 'Yanıt alınamadı.');
+                
+                // Play sound and show notification if window is not open
+                if (!isOpen) {
+                    document.getElementById('notificationBadge').classList.add('show');
+                    hasNewMessage = true;
+                }
+                playSound('message');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('bot', 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        }
+
+        // Add Message to Chat
+        function addMessage(sender, text) {
+            const messagesDiv = document.getElementById('chatMessages');
+            
+            // Remove welcome message if exists
+            const welcome = document.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const time = new Date().toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    ${sender === 'bot' ? '🤖' : '👤'}
+                </div>
+                <div class="message-content">
+                    <div>${text}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Quick Reply
+        function sendQuickReply(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
+        }
+
+        // Handle Enter Key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Show/Hide Typing
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.add('active');
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        // Toggle Emoji Picker
+        function toggleEmoji() {
+            document.getElementById('emojiPicker').classList.toggle('active');
+        }
+
+        // Add Emoji
+        function addEmoji(emoji) {
+            const input = document.getElementById('messageInput');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emojiPicker').classList.remove('active');
+        }
+
+        // Play Sound
+        function playSound(type) {
+            const audio = new Audio();
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt';
+            audio.volume = 0.3;
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Check for saved bayi session
+        async function checkSavedSession() {
+            const savedUserType = localStorage.getItem('userType');
+            const savedEmail = localStorage.getItem('bayiEmail');
+            const savedCompanyName = localStorage.getItem('bayiCompanyName');
+            const savedSessionId = localStorage.getItem('sessionId');
+            
+            if (savedUserType === 'bayi' && savedEmail && savedCompanyName) {
+                // Verify session is still valid
+                try {
+                    const { data, error } = await supabase
+                        .from('bayi_users')
+                        .select('*')
+                        .eq('email', savedEmail)
+                        .eq('is_active', true)
+                        .single();
+                    
+                    if (!error && data) {
+                        isBayiMode = true;
+                        currentWebhook = BAYI_WEBHOOK;
+                        bayiCompanyName = data.company_name;
+                        bayiEmail = data.email;
+                        sessionId = savedSessionId || ('bayi_' + data.id + '_' + Date.now());
+                        
+                        const bayiBtn = document.getElementById('bayiLoginBtn');
+                        bayiBtn.innerHTML = '<i class="fas fa-user-check"></i> ' + data.company_name.substring(0, 15);
+                        bayiBtn.classList.add('logged-in');
+                        bayiBtn.title = 'Çıkış Yap: ' + data.company_name;
+                        bayiBtn.onclick = showBayiLogin;
+                    }
+                } catch (error) {
+                    console.log('Session validation failed:', error);
+                    // Clear invalid session
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('bayiEmail');
+                    localStorage.removeItem('bayiCompanyName');
+                    localStorage.removeItem('sessionId');
+                }
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            // Check for saved session
+            checkSavedSession();
+            
+            // Set default language from browser
+            const browserLang = navigator.language.substring(0, 2);
+            if (translations[browserLang]) {
+                setLanguage(browserLang);
+            }
+            
+            // Show tooltip after 3 seconds
+            setTimeout(() => {
+                if (!isOpen && !localStorage.getItem('tooltipShown')) {
+                    document.getElementById('widgetTooltip').classList.add('show');
+                    localStorage.setItem('tooltipShown', 'true');
+                    
+                    // Hide after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('widgetTooltip').classList.remove('show');
+                    }, 5000);
+                }
+            }, 3000);
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.lang-btn') && !e.target.closest('.lang-dropdown')) {
+                document.getElementById('langDropdown').classList.remove('active');
+            }
+            if (!e.target.closest('.input-wrapper')) {
+                document.getElementById('emojiPicker').classList.remove('active');
+            }
+            // Close modals when clicking outside
+            if (e.target.classList.contains('modal')) {
+                document.getElementById('bayiModal').classList.remove('active');
+                document.getElementById('bayiLogoutModal').classList.remove('active');
+            }
+        });
+
+        // Listen for messages from parent window (if in iframe)
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'openChat') {
+                if (!isOpen) toggleChat();
+            }
+            if (event.data.type === 'closeChat') {
+                if (isOpen) toggleChat();
+            }
+        });
+    </script>
+</body>
+</html>
